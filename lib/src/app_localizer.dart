@@ -70,7 +70,7 @@ class AppLocalizer extends StatelessWidget {
   ///
   /// Default locale is `en_US`.
   ///
-  static Locale defaultLocale = Locale.fromSubtags(
+  static const Locale defaultLocale = Locale.fromSubtags(
     languageCode: 'en',
     countryCode: 'US',
   );
@@ -135,13 +135,34 @@ class AppLocalizer extends StatelessWidget {
   ///
   static Locale localeListResolutionCallback(BuildContext context,
       List<Locale>? devLocales, Iterable<Locale> appLocales) {
-    _platformLocales = window.locales; // Updates user preferred list
+    // Updates user preferred list
+    _platformLocales = PlatformDispatcher.instance.locales;
     if (usePlatformLocale) {
       _updateLocale(_resolveFromPlatform());
     }
     return _notifier.value;
   }
 
+  ///
+  /// Resolves [locale] against [supportedLocales] in this order:
+  /// 1. compare [locale] to [supportedLocales]
+  /// 2. if not found then compare language codes
+  /// 3. if not found then return [defaultLocale]
+  static Locale resolveLocale(Locale locale, List<Locale> supportedLocales,
+      {Locale? defaultLocale}) {
+    if (supportedLocales.contains(locale)) {
+      return locale;
+    }
+    //--- No full match => try language codes only
+    String langCode = locale.languageCode;
+    for (Locale locale in supportedLocales) {
+      if (langCode == locale.languageCode) {
+        return locale;
+      }
+    }
+    //--- Still not found => use default
+    return defaultLocale ?? AppLocalizer.defaultLocale;
+  }
 
   /// Platform locales as selected and ordered by user.
   /// Updated by [localeListResolutionCallback].
@@ -162,25 +183,13 @@ class AppLocalizer extends StatelessWidget {
     if (_usePlatformLocale != fromPlatform) {
       _usePlatformLocale = fromPlatform;
       if (_usePlatformLocale) {
-        _updateLocale(_resolveByLocale(window.locale));
+        _updateLocale(_resolveByLocale(PlatformDispatcher.instance.locale));
       }
     }
   }
 
-  static Locale _resolveByLocale(Locale newLocale) {
-    //--- Lookup in supported locales
-    if (supportedLocales.contains(newLocale)) {
-      return newLocale;
-    }
-    //--- No full match => try language codes only
-    for (Locale locale in supportedLocales) {
-      if (newLocale.languageCode == locale.languageCode) {
-        return locale;
-      }
-    }
-    //--- Still not found => use default
-    return defaultLocale;
-  }
+  static Locale _resolveByLocale(Locale newLocale) =>
+      resolveLocale(newLocale, supportedLocales);
 
   static Locale _resolveFromPlatform() {
     for (Locale locale in _platformLocales) {
@@ -227,21 +236,21 @@ class AppLocalizer extends StatelessWidget {
     Locale? initialLocale,
     ValueChanged<Locale>? forward,
   }) {
-    AppLocalizer._platformLocales = window.locales;
+    AppLocalizer._platformLocales = PlatformDispatcher.instance.locales;
     if (initialLocale != null) {
       _notifier.value = _resolveByLocale(initialLocale);
       _usePlatformLocale = false;
     } else {
-      _notifier.value = _resolveByLocale(window.locale);
+      _notifier.value = _resolveByLocale(PlatformDispatcher.instance.locale);
       _usePlatformLocale = true;
     }
 //    initializeDateFormatting().then((value) =>
 //       debugPrint('date formatting initialized')); // Prepare date formatters
-    debugPrint('AppLocalizer.init platform=$_usePlatformLocale'
-        ' active=${_notifier.value} '
-        'initialLocale=$initialLocale '
-        'window.locale=${window.locale} '
-        'window.locales=${window.locales}');
+    debugPrint('AppLocalizer.init usePlatformLocale=$_usePlatformLocale'
+        ' active=${_notifier.value}'
+        ' initialLocale=$initialLocale'
+        ' window.locale=${PlatformDispatcher.instance.locale}'
+        ' window.locales=${PlatformDispatcher.instance.locales}');
     Translator.activeLanguageCode = _notifier.value.languageCode;
     if (forward != null) {
       forward(_notifier.value);
