@@ -1,4 +1,6 @@
-const Map<String, Map<String, String>> exampleTranslations = {
+import 'package:app_localizer/app_localizer.dart';
+
+Map<String, Map<String, String>> exampleTranslations = {
   'activeLocale.help': {
     'de': 'Hilfetext für "activeLocale"=='
         '"activeLocale" ist die aktuell für die App eingestellte Sprache.',
@@ -41,6 +43,25 @@ const Map<String, Map<String, String>> exampleTranslations = {
     'en': 'Help',
     'es': 'Ayuda',
   },
+
+  // --- Counter Page
+  'counter.page.title': {
+    'de': 'Zähler Beispiel',
+    'en': 'Counter Example',
+    'es': 'Numerador Ejemplo',
+  },
+  'counter.navigate.tooltip': {
+    'de': 'Navigiere zum Zählerbeispiel',
+    'en': 'Navigate to Counter Example',
+    'es': 'Navegar a Numerador Ejemplo',
+  },
+  'counter.push.info': {
+    'de': 'Du hast den Zähler auf %d eingestellt'.zero('Null'),
+    'en': 'Counter Example',
+    'es': 'Numerador Ejemplo',
+  },
+
+  // ---
   'countries.label': {
     'de': 'Länder',
     'en': 'Countries',

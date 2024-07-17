@@ -4,6 +4,7 @@ import 'package:app_localizer/app_localizer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'counter_page.dart';
 import 'main.i18n.dart';
 
 const double SAFE_AREA_PADDING = 5.0;
@@ -63,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint( 'MyHomePageState.build()');
+    debugPrint('MyHomePageState.build()');
     return Scaffold(
       appBar: _buildAppBar(),
       body: SafeArea(
@@ -78,6 +79,16 @@ class _MyHomePageState extends State<MyHomePage> {
   PreferredSizeWidget _buildAppBar() => AppBar(
         title: Text('app_localizer ' + 'example.label'.i18n),
         actions: [
+          IconButton(
+            tooltip: 'counter.navigate.tooltip'.i18n,
+            icon: Icon(Icons.numbers),
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (BuildContext context) => CounterPage(),
+              ),
+            ),
+          ),
           LanguageChooser(
             onChanged: (v) => AppLocalizer.activeLocale = v,
             selectionDisplay: DisplayItemType.flagAndName,
@@ -145,9 +156,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   LanguageChooser(
                     itemDisplay: displayItem,
                     onChanged: (Locale? newLang) =>
-                    setState(() =>
-                        AppLocalizer.activeLocale = newLang                    ),
-                      selectable:
+                        setState(() => AppLocalizer.activeLocale = newLang),
+                    selectable:
                         supportedLocales.map((e) => e.languageCode).toList(),
                     selectionDisplay: displaySelection,
                     value: AppLocalizer.usePlatformLocale
@@ -229,7 +239,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Text('code=${_currency1!.code}  '
                       'symbol=${_currency1!.symbol}  '
                       'minor=${_currency1!.minor}  '
-                      'country=${_currency1!.country}h'),
+                      'country=${_currency1!.country}'),
                   SizedBox.shrink(),
                   SizedBox.shrink(),
                 ],

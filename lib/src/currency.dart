@@ -45,8 +45,8 @@ class Currency {
   final int? minor;
 
   /// Symbol of this currency
-  late String _symbol;
-  String get symbol => (_symbol.isNotEmpty) ? symbol : code;
+  String _symbol = '';
+  String get symbol => _symbol;
 
   /// Gets name translated to [locale].
   /// * If [locale] is `null` then `activeLocale` from [AppLocalizer] will be used

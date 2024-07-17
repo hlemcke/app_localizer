@@ -195,7 +195,9 @@ class Translator {
 
 class TranslatorException {
   String message;
+
   TranslatorException(this.message);
+
   @override
   String toString() => message;
 }
@@ -214,7 +216,7 @@ class TranslatorException {
 ///     'en': 'You clicked the button %d times'
 ///         .zero('You haven't clicked the button')
 ///         .one('You clicked it once')
-///         .two('You clicked a couple times')
+///         .two('You clicked it twice')
 ///         .many('You clicked %d times')
 ///         .times(12, 'You clicked a dozen times'),
 ///   };
