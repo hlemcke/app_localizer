@@ -112,6 +112,13 @@ class Languages {
         .toList();
   }
 
+  static List<Language> filterByLocales(List<Locale> locales) {
+    _initialize();
+    return _languages
+        .where((Language item) => locales.contains(item.toLocale()))
+        .toList();
+  }
+
   ///
   /// Returns language from [langCode].
   /// Returns `null` if `code == null` or not found

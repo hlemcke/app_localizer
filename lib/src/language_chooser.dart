@@ -2,19 +2,6 @@ import 'package:app_localizer/app_localizer.dart';
 import 'package:app_localizer/src/language.i18n.dart';
 import 'package:flutter/material.dart';
 
-import 'display_item.dart';
-import 'language.dart';
-
-///
-/// [DropdownButton] to select a language.
-///
-/// Languages are loaded from `language.csv.dart`.
-/// A subset of these languages can be used by setting [selectable].
-///
-/// Language names will be translated by using [AppLocalizer.activeLocale].
-/// Can be overwritten by providing [locale].
-/// [useNativeNames] = true will display the native name of the language.
-///
 class LanguageChooser extends StatelessWidget {
   /// See [DropdownButton]
   final AlignmentGeometry alignment;
@@ -34,10 +21,9 @@ class LanguageChooser extends StatelessWidget {
   /// If `null` then field will be disabled
   final ValueChanged<Locale?>? onChanged;
 
-  /// Filter for selectable languages.
-  /// List of language codes.
-  /// `null` will show full list.
-  final List<String>? selectable;
+  /// List of selectable languages.
+  /// `null` uses Locales derived from `language.csv.dart`.
+  final List<Locale>? selectables;
 
   /// Target language in which language names will be displayed.
   /// This value is only used if [useNativeNames] is `false`.
@@ -62,6 +48,16 @@ class LanguageChooser extends StatelessWidget {
   /// Default is `false`.
   final bool withPlatform;
 
+  ///
+  /// Selector for a language from [selectables].
+  ///
+  /// Available languages are Languages are loaded from `language.csv.dart`.
+  /// A subset of these languages can be used by setting [selectables].
+  ///
+  /// Language names will be translated by using [AppLocalizer.activeLocale].
+  /// Can be overwritten by providing [locale].
+  /// [useNativeNames] = true will display the native name of the language.
+  ///
   LanguageChooser({
     this.alignment = AlignmentDirectional.centerStart,
     this.autofocus = false,
@@ -69,7 +65,7 @@ class LanguageChooser extends StatelessWidget {
     this.focusNode,
     this.locale,
     this.onChanged,
-    this.selectable,
+    this.selectables,
     this.itemDisplay = DisplayItemType.flagAndName,
     this.selectionDisplay = DisplayItemType.flagAndName,
     this.underline,
@@ -81,8 +77,8 @@ class LanguageChooser extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //--- Build item list
-    List<Language> languages = (selectable != null)
-        ? Languages.filterByCodes(selectable!).toList()
+    List<Language> languages = (selectables != null)
+        ? Languages.filterByLocales(selectables!).toList()
         : Languages.values().toList();
     //--- Build display names
     Map<String, Language> data = {};

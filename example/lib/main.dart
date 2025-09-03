@@ -132,7 +132,7 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 TableRow(children: [
                   Text('window.locale'),
-                  Text('${window.locale}'),
+                  Text('${PlatformDispatcher.instance.locale}'),
                   HelpButtonWithDialog(content: 'window.locale.help'.i18n),
                 ]),
                 TableRow(children: [
@@ -157,8 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     itemDisplay: displayItem,
                     onChanged: (Locale? newLang) =>
                         setState(() => AppLocalizer.activeLocale = newLang),
-                    selectable:
-                        supportedLocales.map((e) => e.languageCode).toList(),
+                    selectables: supportedLocales,
                     selectionDisplay: displaySelection,
                     value: AppLocalizer.usePlatformLocale
                         ? Language.platformLocale
@@ -263,7 +262,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget _buildSelectableItems() {
     List<String> _selectableCountries = ['DE', 'ES', 'FR', 'IT'];
     List<String> _selectableCurrencies = ['EUR', 'USD'];
-    List<String> _selectableLocales = ['en', 'es'];
+    List<Locale> _selectableLocales = [Locale('en'), Locale('es')];
 
     return Padding(
       padding: EdgeInsets.all(SAFE_AREA_PADDING),
@@ -319,7 +318,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Text(_selectableLocales.toString()),
               LanguageChooser(
                 onChanged: (v) => setState(() => _language2 = v),
-                selectable: _selectableLocales,
+                selectables: _selectableLocales,
                 value: _language2,
               ),
               Text('${_language2?.languageCode}', textAlign: TextAlign.center),
