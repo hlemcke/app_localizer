@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:sprintf/sprintf.dart';
 
 final String _splitter1 = '\uFFFF';
 final String _splitter2 = '\uFFFE';
@@ -11,7 +10,7 @@ final String _splitter2 = '\uFFFE';
 /// Can be overwritten by providing optional [langCode].
 ///
 String translate(String key, Translator translator, [String? langCode]) {
-//--- Get all translations for given key
+  //--- Get all translations for given key
   Map<String, String>? _txns4key = translator.translations[key];
   if (_txns4key == null) {
     Translator.recordMissingKey(key);
@@ -28,11 +27,25 @@ String translate(String key, Translator translator, [String? langCode]) {
 }
 
 ///
+/// Replaces `%d` and `%s` in `template` with values
+///
+String sprintf(String template, List<dynamic> values) {
+  int i = 0;
+  return template.replaceAllMapped(
+    RegExp(r"%[sd]"),
+    (_) => values[i++].toString(),
+  );
+}
+
+///
 /// Calls [translate()] then [sprintf()] to replace parameters with [values].
 ///
-String translateFill(String key, Translator translator, List<dynamic> values,
-        [String? langCode]) =>
-    sprintf(translate(key, translator, langCode), values);
+String translateFill(
+  String key,
+  Translator translator,
+  List<dynamic> values, [
+  String? langCode,
+]) => sprintf(translate(key, translator, langCode), values);
 
 ///
 /// Translates into plural specific texts (see [Plural]).
@@ -56,8 +69,10 @@ String translatePlural(
       String plural = plurals[i];
       List<String> parts = plural.split(_splitter2);
       if (parts.length != 2 || parts[0].isEmpty || parts[1].isEmpty) {
-        throw TranslatorException('Invalid plural "$plural" found in'
-            '$allPluralsInOneString');
+        throw TranslatorException(
+          'Invalid plural "$plural" found in'
+          '$allPluralsInOneString',
+        );
       }
       all[parts[0]] = parts[1];
     }
@@ -120,8 +135,8 @@ class Translator {
   /// Replace this function to also log missing keys
   /// outside of [Translator].
   ///
-  static void Function(String) missingKeyCallback =
-      (String key) => debugPrint('➜ Key "$key" not found in translations');
+  static void Function(String) missingKeyCallback = (String key) =>
+      debugPrint('➜ Key "$key" not found in translations');
 
   /// `false` will not record missing keys
   static bool missingKeyRecording = true;
@@ -183,7 +198,10 @@ class Translator {
   /// Nothing will be done here if [langCode] == [keyIsTranslationTo].
   ///
   static void recordMissingTranslation(
-      String key, Translator translator, String langCode) {
+    String key,
+    Translator translator,
+    String langCode,
+  ) {
     if (langCode != translator.keyIsTranslationTo) {
       missingTranslationCallback(key, langCode);
       if (missingTranslationRecording) {

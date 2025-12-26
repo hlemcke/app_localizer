@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../app_localizer.dart';
-import 'currency.dart';
 
 class CurrencyChooser extends StatelessWidget {
   /// See [DropdownButton]
@@ -87,10 +86,13 @@ class CurrencyChooser extends StatelessWidget {
           .toList(),
       onChanged: onChanged,
       selectedItemBuilder: (BuildContext context) => sorted
-          .map((String name) => DisplayItem(
+          .map(
+            (String name) => DisplayItem(
               label: name,
               countryCode: data[name]!.code.substring(0, 2),
-              displayType: selectionDisplay))
+              displayType: selectionDisplay,
+            ),
+          )
           .toList(),
       underline: underline,
       value: value,

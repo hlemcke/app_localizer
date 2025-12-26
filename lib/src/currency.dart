@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:app_localizer/src/currency.i18n.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 
+import '../app_localizer.dart';
 import 'app_localizer.dart';
 import 'currency.csv.dart';
 
@@ -20,15 +21,23 @@ import 'currency.csv.dart';
 /// ```
 ///
 class Currency {
+  static Currency get EUR => findByCode('EUR')!;
+  static Currency get USD => findByCode('USD')!;
+
+  ///
+  /// Creates a new currency
+  ///
   Currency({
     required this.code,
     this.country,
     this.minor,
     required this.name,
     String? symbol,
-  })  : assert(code.length == 3),
-        assert(country == null || country.length == 2,
-            'Currency "$code" -> country "$country" must be null or 2 uppercase chars') {
+  }) : assert(code.length == 3),
+       assert(
+         country == null || country.length == 2,
+         'Currency "$code" -> country "$country" must be null or 2 uppercase chars',
+       ) {
     _symbol = symbol ?? code;
   }
 
@@ -47,6 +56,18 @@ class Currency {
   /// Symbol of this currency
   String _symbol = '';
   String get symbol => _symbol;
+
+  ///
+  /// Finds currency by its three letter code.
+  ///
+  static Currency? findByCode(String? code) {
+    Currencies._initialize();
+    if ((code == null) || (code.length != 3)) return null;
+    code = code.toUpperCase();
+    return Currencies._currencies.firstWhereOrNull(
+      (Currency currency) => currency.code == code,
+    );
+  }
 
   /// Gets name translated to [locale].
   /// * If [locale] is `null` then `activeLocale` from [AppLocalizer] will be used
@@ -95,13 +116,15 @@ class Currencies {
         continue;
       }
       List<String> parts = line.split(',');
-      _currencies.add(Currency(
-        code: parts[indexCode],
-        name: parts[indexName],
-        minor: int.tryParse(parts[indexMinor]) ?? 0,
-        symbol: parts[indexSymbol],
-        country: parts[indexCountry],
-      ));
+      _currencies.add(
+        Currency(
+          code: parts[indexCode],
+          name: parts[indexName],
+          minor: int.tryParse(parts[indexMinor]) ?? 0,
+          symbol: parts[indexSymbol],
+          country: parts[indexCountry],
+        ),
+      );
     }
     //--- Ready
     _initialized = true;
@@ -117,15 +140,14 @@ class Currencies {
         .toList();
   }
 
-  ///
-  /// Returns `null` if `code == null` or not found
-  ///
-  static Currency? findByCode(String? code) {
-    _initialize();
-    if ((code == null) || (code.length != 3)) return null;
-    code = code.toUpperCase();
-    return _currencies
-        .firstWhereOrNull((Currency currency) => currency.code == code);
+  static List<Currency> fromLocales(List<Locale> locales) {
+    Set<Currency> currencies = {};
+    for (Locale locale in locales) {
+      String? countryCode = locale.countryCode;
+      if (countryCode == null) continue;
+      currencies.addAll(_currencies.where((cur) => cur.country == countryCode));
+    }
+    return currencies.toList();
   }
 
   ///
@@ -148,7 +170,4 @@ class Currencies {
     _initialize();
     return _currencies;
   }
-
-  static Currency get EUR => findByCode('EUR')!;
-  static Currency get USD => findByCode('USD')!;
 }

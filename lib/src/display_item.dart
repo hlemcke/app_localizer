@@ -27,7 +27,7 @@ class LocalizedCountryDisplayItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Country? country = Countries.find(countryCode);
+    Country? country = Country.find(countryCode);
     country ??= Country.unknown;
     return DisplayItem(
       label: country.getTranslation(locale),
@@ -94,9 +94,9 @@ class DisplayItem extends StatelessWidget {
 
   /// Get the flag image by country code (2 uppercase characters)
   static Image getFlagByCode(String countryCode) => Image.asset(
-        'lib/assets/flags/$countryCode.png',
-        package: 'app_localizer',
-      );
+    'lib/assets/flags/$countryCode.png',
+    package: 'app_localizer',
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -110,18 +110,14 @@ class DisplayItem extends StatelessWidget {
     Widget hGap = SizedBox(width: kMinInteractiveDimension / 3);
     name = label.isEmpty
         ? null
-        : Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-            softWrap: false,
-          );
+        : Text(label, overflow: TextOverflow.ellipsis, softWrap: false);
     if (displayType == DisplayItemType.flagAndName) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           flag!,
           hGap,
-          SingleChildScrollView(scrollDirection: Axis.horizontal, child: name)
+          SingleChildScrollView(scrollDirection: Axis.horizontal, child: name),
         ],
       );
     }
@@ -138,9 +134,4 @@ class DisplayItem extends StatelessWidget {
   }
 }
 
-enum DisplayItemType {
-  flagAndName,
-  flagOnly,
-  nameAndFlag,
-  nameOnly;
-}
+enum DisplayItemType { flagAndName, flagOnly, nameAndFlag, nameOnly }

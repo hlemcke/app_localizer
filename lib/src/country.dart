@@ -46,9 +46,11 @@ class Country {
     this.num3,
     this.predial,
     this.timezone,
-  })  : assert(alpha2.length == 2),
-        assert(alpha3 == null || alpha3.length == 3,
-            'Country "$alpha2" -> alpha3 "$alpha3" must be null or 3 uppercase chars');
+  }) : assert(alpha2.length == 2),
+       assert(
+         alpha3 == null || alpha3.length == 3,
+         'Country "$alpha2" -> alpha3 "$alpha3" must be null or 3 uppercase chars',
+       );
 
   /// ISO-3166 Alpha-2 code. 2 char uppercase
   final String alpha2;
@@ -75,6 +77,66 @@ class Country {
   /// Returns mean timezone if the country covers multiple lines of latitude.
   final double? timezone;
 
+  ///
+  /// Finds country by any one from:
+  ///
+  /// * code2
+  /// * code3
+  /// * predial
+  ///
+  static Country? find(String searchValue) {
+    Countries._initialize();
+    return Countries._countries.firstWhereOrNull(
+      (Country c) =>
+          ((searchValue == c.alpha2) ||
+          (searchValue == c.alpha3) ||
+          (searchValue == '${c.num3}')),
+    );
+  }
+
+  ///
+  /// Returns Country or `null` if `code2 == null` or not found
+  ///
+  static Country? findByCode2(String? code2) {
+    Countries._initialize();
+    if ((code2 == null) || (code2.length != 2)) {
+      return null;
+    }
+    code2 = code2.toUpperCase();
+    return Countries._countries.firstWhereOrNull(
+      (Country country) => country.alpha2 == code2,
+    );
+  }
+
+  ///
+  /// Returns Country or `null` if `code3 == null` or not found
+  ///
+  static Country? findByCode3(String? code3) {
+    Countries._initialize();
+    if ((code3 == null) || (code3.length != 3)) {
+      return null;
+    }
+    code3 = code3.toUpperCase();
+    return Countries._countries.firstWhereOrNull(
+      (country) => country.alpha3 == code3,
+    );
+  }
+
+  ///
+  /// Returns Country or `null`. Searches for locale.countryCode
+  ///
+  static Country? findByLocale(Locale locale) =>
+      findByCode2(locale.countryCode);
+
+  /// Returns `null` if `number == null` or not found
+  static Country? findByPredial(int? number) {
+    Countries._initialize();
+    if (number == null) return null;
+    return Countries._countries.firstWhereOrNull(
+      (country) => country.predial == number,
+    );
+  }
+
   /// Gets name translated to [locale].
   /// * If [locale] is `null` then `activeLocale` from [AppLocalizer] will be used
   /// * If no translation found then the native name will be returned
@@ -95,10 +157,10 @@ class Country {
 }
 
 ///
-/// List of all countries from `country.csv.dart`
+/// All countries from `country.csv.dart`
 ///
 class Countries {
-  static final List<Country> _countries = [];
+  static final List<Country> _countries = <Country>[];
 
   ///
   /// Returns currencies having a code from [codes].
@@ -107,44 +169,9 @@ class Countries {
     _initialize();
     return _countries
         .where(
-            (Country c) => codes.contains(c.alpha2) || codes.contains(c.alpha3))
+          (Country c) => codes.contains(c.alpha2) || codes.contains(c.alpha3),
+        )
         .toList();
-  }
-
-  static Country? find(String searchValue) {
-    _initialize();
-    return _countries.firstWhereOrNull((Country c) =>
-        ((searchValue == c.alpha2) ||
-            (searchValue == c.alpha3) ||
-            (searchValue == '${c.num3}')));
-  }
-
-  /// Returns `null` if `code2 == null` or not found
-  static Country? findByCode2(String? code2) {
-    _initialize();
-    if ((code2 == null) || (code2.length != 2)) {
-      return null;
-    }
-    code2 = code2.toUpperCase();
-    return _countries
-        .firstWhereOrNull((Country country) => country.alpha2 == code2);
-  }
-
-  /// Returns `null` if `code3 == null` or not found
-  static Country? findByCode3(String? code3) {
-    _initialize();
-    if ((code3 == null) || (code3.length != 3)) {
-      return null;
-    }
-    code3 = code3.toUpperCase();
-    return _countries.firstWhereOrNull((country) => country.alpha3 == code3);
-  }
-
-  /// Returns `null` if `number == null` or not found
-  static Country? findByPredial(int? number) {
-    _initialize();
-    if (number == null) return null;
-    return _countries.firstWhereOrNull((country) => country.predial == number);
   }
 
   ///
@@ -182,16 +209,18 @@ class Countries {
         continue;
       }
       List<String> parts = line.split(',');
-      _countries.add(Country(
-        alpha2: parts[0],
-        alpha3: parts[1],
-        num3: int.tryParse(parts[2]) ?? 0,
-        name: parts[3],
-        currency: parts[4],
-        language: parts[5],
-        predial: int.tryParse(parts[6]) ?? 0,
-        timezone: double.tryParse(parts[7]) ?? 0,
-      ));
+      _countries.add(
+        Country(
+          alpha2: parts[0],
+          alpha3: parts[1],
+          num3: int.tryParse(parts[2]) ?? 0,
+          name: parts[3],
+          currency: parts[4],
+          language: parts[5],
+          predial: int.tryParse(parts[6]) ?? 0,
+          timezone: double.tryParse(parts[7]) ?? 0,
+        ),
+      );
     }
     //--- Ready
     _initialized = true;
