@@ -1,7 +1,7 @@
 # AppLocalizer
 
 `AppLocalizer` manages the apps locale.
-At startup it is taken from the platform, but can be overwritten from a
+At startup, it is taken from the platform, but can be overwritten from a
 persistence storage like `SharedPreferences`.
 
 App locale can be changed both from within the app (with `LanguageChooser`)

@@ -1,6 +1,11 @@
 analyzer:
   errors:
     always_specify_types: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
 
 # For lint rules and documentation, see http://dart-lang.github.io/linter/lints.
 # Uncomment to specify additional rules.

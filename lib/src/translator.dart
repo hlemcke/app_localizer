@@ -4,26 +4,77 @@ final String _splitter1 = '\uFFFF';
 final String _splitter2 = '\uFFFE';
 
 ///
-/// Translates given [key] to [langCode].
+/// Translates given [key] to [langCode] (default: [Translator.langCode]
+/// or [Translator.activeLanguageCode]).
 ///
-/// Uses [Translator.activeLanguageCode] for target language.
-/// Can be overwritten by providing optional [langCode].
+/// * key not found -> recorded as missing key, returns `key`
+/// * no text for language -> recorded as missing translation, returns text
+///   of [Translator.fallbackLanguageCode] if `fallback`, else `key`
 ///
-String translate(String key, Translator translator, [String? langCode]) {
-  //--- Get all translations for given key
-  Map<String, String>? _txns4key = translator.translations[key];
-  if (_txns4key == null) {
-    Translator.recordMissingKey(key);
-  } else {
-    String _lang =
-        langCode ?? translator.langCode ?? Translator.activeLanguageCode;
-    String? _txn = _txns4key[_lang];
-    if (_txn != null) {
-      return _txn;
-    }
-    Translator.recordMissingTranslation(key, translator, _lang);
+String translate(
+  String key,
+  Translator translator, {
+  String? langCode,
+  bool fallback = true,
+}) => _translate(key, translator, langCode: langCode, fallback: fallback)!;
+
+///
+/// Like [translate] but returns `null` instead of `key`.
+/// Use it for optional texts where a missing key is a valid case:
+///
+/// * key not found -> `null`, NOT recorded (key is optional)
+/// * no text for language -> recorded as missing translation, returns text
+///   of [Translator.fallbackLanguageCode] if `fallback`, else `null`
+///
+String? translateOrNull(
+  String key,
+  Translator translator, {
+  String? langCode,
+  bool fallback = true,
+}) => _translate(
+  key,
+  translator,
+  langCode: langCode,
+  fallback: fallback,
+  orNull: true,
+);
+
+///
+/// Lookup used by [translate] and [translateOrNull]:
+///
+/// 1. text in target language
+/// 2. `key` itself if target language is [Translator.keyIsTranslationTo]
+/// 3. text in [Translator.fallbackLanguageCode] if `fallback`
+/// 4. `orNull` ? `null` : `key`
+///
+/// Missing keys are only recorded if not `orNull`.
+/// Missing translations (cases 3 and 4) are always recorded.
+///
+String? _translate(
+  String key,
+  Translator translator, {
+  String? langCode,
+  bool fallback = true,
+  bool orNull = false,
+}) {
+  Map<String, String>? txns4key = translator.translations[key];
+  if (txns4key == null) {
+    if (!orNull) Translator.recordMissingKey(key);
+    return orNull ? null : key;
   }
-  return key;
+  String lang =
+      langCode ?? translator.langCode ?? Translator.activeLanguageCode;
+  String? txn = txns4key[lang];
+  if (txn != null) return txn;
+  //--- The key itself is the text in this language
+  if (lang == translator.keyIsTranslationTo) return key;
+  Translator.recordMissingTranslation(key, translator, lang);
+  String? fallbackLang = Translator.fallbackLanguageCode;
+  if (fallback && fallbackLang != null) {
+    String? fallbackTxn = txns4key[fallbackLang];
+    if (fallbackTxn != null) return fallbackTxn;
+  }
+  return orNull ? null : key;
 }
 
 ///
@@ -43,9 +94,13 @@ String sprintf(String template, List<dynamic> values) {
 String translateFill(
   String key,
   Translator translator,
-  List<dynamic> values, [
+  List<dynamic> values, {
   String? langCode,
-]) => sprintf(translate(key, translator, langCode), values);
+  bool fallback = true,
+}) => sprintf(
+  translate(key, translator, langCode: langCode, fallback: fallback),
+  values,
+);
 
 ///
 /// Translates into plural specific texts (see [Plural]).
@@ -55,9 +110,10 @@ String translateFill(
 String translatePlural(
   String key,
   Translator translator,
-  int plural, [
+  int plural, {
   String? langCode,
-]) {
+  bool fallback = true,
+}) {
   //--- Splits one translation into its plural variants. Key is "plural"
   Map<String?, String> _splitIntoPlurals(String allPluralsInOneString) {
     if (!allPluralsInOneString.startsWith(_splitter1)) {
@@ -80,7 +136,12 @@ String translatePlural(
   }
 
   // ---
-  String _txnPlurals = translate(key, translator, langCode);
+  String _txnPlurals = translate(
+    key,
+    translator,
+    langCode: langCode,
+    fallback: fallback,
+  );
   if (_txnPlurals == key) {
     return key;
   }
@@ -129,6 +190,12 @@ class Translator {
   /// This value will be automatically updated from [AppLocalizer].
   ///
   static String activeLanguageCode = 'en';
+
+  ///
+  /// Language used if a key has no text for the target language.
+  /// `null` disables the fallback for all keys.
+  ///
+  static String? fallbackLanguageCode = 'en';
 
   // --- Start of static configuration variables for [Translator] ---
   ///

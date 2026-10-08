@@ -1,14 +1,12 @@
 name: app_localizer_example
 description: Example shows app localizations with selection widgets for country, currency and language.
  Includes platform language setting.
-version: 2.2.0
+version: 3.0.0
 
 environment:
   sdk: ^3.10.0
 
 dependencies:
-  app_localizer:
-    path: ..
   flutter:
     sdk: flutter
   flutter_markdown_plus: ^1.0.5
